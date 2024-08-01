@@ -55,8 +55,10 @@ export const dashboardSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // Dashboard Data
       .addCase(fetchDashboardDataAsync.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(fetchDashboardDataAsync.fulfilled, (state, action) => {
         state.loading = false;
@@ -68,15 +70,35 @@ export const dashboardSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+      // KPI Data
+      .addCase(fetchKPIDataAsync.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(fetchKPIDataAsync.fulfilled, (state, action) => {
+        state.loading = false;
         state.kpis = action.payload;
       })
+      .addCase(fetchKPIDataAsync.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Chart Data
+      .addCase(fetchChartDataAsync.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(fetchChartDataAsync.fulfilled, (state, action) => {
+        state.loading = false;
         if (action.payload.chartType === "line") {
           state.lineChartData = action.payload.data;
         } else if (action.payload.chartType === "bar") {
           state.barChartData = action.payload.data;
         }
+      })
+      .addCase(fetchChartDataAsync.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });

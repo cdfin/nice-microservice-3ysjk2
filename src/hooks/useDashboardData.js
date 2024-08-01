@@ -1,6 +1,10 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchDashboardDataAsync } from "../redux/dashboardSlice";
+import {
+  fetchDashboardDataAsync,
+  fetchKPIDataAsync,
+  fetchChartDataAsync,
+} from "../redux/dashboardSlice";
 
 export const useDashboardData = () => {
   const dispatch = useDispatch();
@@ -9,7 +13,13 @@ export const useDashboardData = () => {
   );
 
   useEffect(() => {
-    dispatch(fetchDashboardDataAsync());
+    const loadData = async () => {
+      await dispatch(fetchDashboardDataAsync());
+      await dispatch(fetchKPIDataAsync());
+      await dispatch(fetchChartDataAsync("line"));
+      await dispatch(fetchChartDataAsync("bar"));
+    };
+    loadData();
   }, [dispatch]);
 
   return { kpis, lineChartData, barChartData, loading, error };
