@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { TextField, Button, Typography, Container, Box } from "@mui/material";
 import { loginAsync } from "../../redux/authSlice";
 
@@ -8,14 +8,14 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { loading, error } = useSelector((state) => state.auth);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const resultAction = await dispatch(loginAsync({ email, password }));
     if (loginAsync.fulfilled.match(resultAction)) {
-      history.push("/");
+      navigate.push("/");
     }
   };
 

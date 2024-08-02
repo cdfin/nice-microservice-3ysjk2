@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import * as authService from "../services/authService";
+import * as authService from "../services/api";
 
 export const loginAsync = createAsyncThunk(
   "auth/login",
@@ -25,26 +25,23 @@ export const registerAsync = createAsyncThunk(
   }
 );
 
-export const verifyEmailAsync = createAsyncThunk(
-  "auth/verifyEmail",
-  async (token, { rejectWithValue }) => {
+export const logoutAsync = createAsyncThunk(
+  "auth/logout",
+  async (_, { rejectWithValue }) => {
     try {
-      const response = await authService.verifyEmail(token);
-      return response;
+      await authService.logout();
     } catch (error) {
       return rejectWithValue(error.message);
     }
   }
 );
-export const updateUserProfileAsync = createAsyncThunk(
-  "auth/updateUserProfile",
-  async ({ userId, profileData }, { rejectWithValue }) => {
+
+export const refreshTokenAsync = createAsyncThunk(
+  "auth/refreshToken",
+  async (_, { rejectWithValue }) => {
     try {
-      const updatedUser = await authService.updateUserProfile(
-        userId,
-        profileData
-      );
-      return updatedUser;
+      const user = await authService.refreshToken();
+      return user;
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -59,9 +56,8 @@ const authSlice = createSlice({
     error: null,
   },
   reducers: {
-    logout: (state) => {
-      authService.logout();
-      state.user = null;
+    clearError: (state) => {
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
@@ -86,62 +82,22 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload;
       })
-      .addCase(verifyEmailAsync.fulfilled, (state, action) => {
-        state.user = { ...state.user, emailVerified: true };
-      })
       .addCase(registerAsync.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-      .addCase(requestPasswordResetAsync.fulfilled, (state) => {
-        state.passwordResetRequested = true;
+      .addCase(logoutAsync.fulfilled, (state) => {
+        state.user = null;
       })
-      .addCase(resetPasswordAsync.fulfilled, (state) => {
-        state.passwordResetSuccessful = true;
-      })
-      .addCase(updateUserProfileAsync.fulfilled, (state, action) => {
+      .addCase(refreshTokenAsync.fulfilled, (state, action) => {
         state.user = action.payload;
       })
-      .addCase(getUserRoleAsync.fulfilled, (state, action) => {
-        state.user = { ...state.user, role: action.payload.role };
+      .addCase(refreshTokenAsync.rejected, (state) => {
+        state.user = null;
       });
   },
 });
-export const requestPasswordResetAsync = createAsyncThunk(
-  "auth/requestPasswordReset",
-  async (email, { rejectWithValue }) => {
-    try {
-      const response = await authService.requestPasswordReset(email);
-      return response;
-    } catch (error) {
-      return rejectWithValue(error.message);
-    }
-  }
-);
 
-export const resetPasswordAsync = createAsyncThunk(
-  "auth/resetPassword",
-  async ({ token, newPassword }, { rejectWithValue }) => {
-    try {
-      const response = await authService.resetPassword(token, newPassword);
-      return response;
-    } catch (error) {
-      return rejectWithValue(error.message);
-    }
-  }
-);
-export const getUserRoleAsync = createAsyncThunk(
-  "auth/getUserRole",
-  async (userId, { rejectWithValue }) => {
-    try {
-      const roleData = await authService.getUserRole(userId);
-      return roleData;
-    } catch (error) {
-      return rejectWithValue(error.message);
-    }
-  }
-);
-
-export const { logout } = authSlice.actions;
+export const { clearError } = authSlice.actions;
 
 export default authSlice.reducer;
