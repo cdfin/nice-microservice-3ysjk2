@@ -1,37 +1,47 @@
-import axios from "axios";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Box, Typography, CircularProgress } from "@mui/material";
+import { fetchDashboardDataAsync } from "../redux/dashboardSlice";
 
-const API_BASE_URL = "http://localhost:5000/api"; // Update this if your backend is on a different port
+function Dashboard() {
+  const dispatch = useDispatch();
+  const { data, loading, error } = useSelector((state) => state.dashboard);
 
-const api = axios.create({
-  baseURL: API_BASE_URL,
-});
+  useEffect(() => {
+    dispatch(fetchDashboardDataAsync());
+  }, [dispatch]);
 
-export const fetchDashboardData = async () => {
-  try {
-    const response = await api.get("/dashboard");
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching dashboard data:", error);
-    throw error;
+  if (loading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
+      >
+        <CircularProgress />
+      </Box>
+    );
   }
-};
 
-export const fetchKPIData = async () => {
-  try {
-    const response = await api.get("/kpis");
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching KPI data:", error);
-    throw error;
+  if (error) {
+    return (
+      <Box>
+        <Typography variant="h6" color="error">
+          Error: {error}
+        </Typography>
+      </Box>
+    );
   }
-};
 
-export const fetchChartData = async (chartType) => {
-  try {
-    const response = await api.get(`/chart/${chartType}`);
-    return response.data;
-  } catch (error) {
-    console.error(`Error fetching ${chartType} chart data:`, error);
-    throw error;
-  }
-};
+  return (
+    <Box sx={{ flexGrow: 1, p: 3 }}>
+      <Typography variant="h4" gutterBottom>
+        Dashboard
+      </Typography>
+      {data && <pre>{JSON.stringify(data, null, 2)}</pre>}
+    </Box>
+  );
+}
+
+export default Dashboard;

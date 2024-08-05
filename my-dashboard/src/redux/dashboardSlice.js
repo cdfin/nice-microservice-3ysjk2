@@ -1,16 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import { fetchDashboardData } from "../services/api";
 
-const API_URL = "http://localhost:5000/api";
-
-export const fetchDashboardData = createAsyncThunk(
-  "dashboard/fetchData",
+export const fetchDashboardDataAsync = createAsyncThunk(
+  "dashboard/fetchDashboardData",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/dashboard`);
-      return response.data;
+      const data = await fetchDashboardData();
+      return data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.message);
     }
   }
 );
@@ -25,14 +23,15 @@ const dashboardSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchDashboardData.pending, (state) => {
+      .addCase(fetchDashboardDataAsync.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
-      .addCase(fetchDashboardData.fulfilled, (state, action) => {
+      .addCase(fetchDashboardDataAsync.fulfilled, (state, action) => {
         state.loading = false;
         state.data = action.payload;
       })
-      .addCase(fetchDashboardData.rejected, (state, action) => {
+      .addCase(fetchDashboardDataAsync.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
