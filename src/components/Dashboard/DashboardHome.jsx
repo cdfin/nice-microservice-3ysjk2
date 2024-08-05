@@ -29,7 +29,7 @@ function DashboardHome() {
 
   const handleDateChange = (startDate, endDate) => {
     console.log("Date range selected:", startDate, endDate);
-    dispatch(fetchDashboardDataAsync());
+    dispatch(fetchDashboardDataAsync({ startDate, endDate }));
   };
 
   if (loading) {
